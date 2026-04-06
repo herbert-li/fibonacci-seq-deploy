@@ -52,6 +52,8 @@ spec:
 
         # Environment variables
         env:
+        - name: PORT
+          value: "5001"
         - name: WORKERS
           value: "4"
         - name: LOG_LEVEL

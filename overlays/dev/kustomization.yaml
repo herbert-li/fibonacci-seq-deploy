@@ -29,8 +29,8 @@ patchesStrategicMerge:
 # Image configuration for dev
 images:
   - name: fibonacci-api
-    newName: docker.io/changeme/fibonacci-api
-    newTag: dev-latest
+    newName: docker.io/linan0890/fibonacci-api
+    newTag: dev
 
 # ConfigMap generator for environment-specific config
 configMapGenerator:

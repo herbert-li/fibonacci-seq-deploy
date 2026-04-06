@@ -22,5 +22,5 @@ resources:
 # Images (to be replaced by overlays)
 images:
   - name: fibonacci-api
-    newName: docker.io/changeme/fibonacci-api
+    newName: docker.io/linan0890/fibonacci-api
     newTag: latest
