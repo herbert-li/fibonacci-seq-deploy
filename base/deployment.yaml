@@ -25,7 +25,7 @@ spec:
         version: v1
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "5000"
+        prometheus.io/port: "5001"
         prometheus.io/path: "/metrics"
     spec:
       # Run as non-root user (matches Dockerfile)
@@ -47,7 +47,7 @@ spec:
 
         ports:
         - name: http
-          containerPort: 5000
+          containerPort: 5001
           protocol: TCP
 
         # Environment variables

@@ -15,7 +15,7 @@ spec:
     app: fibonacci-api
   ports:
   - name: http
-    port: 5000
+    port: 5001
     targetPort: http
     protocol: TCP
   sessionAffinity: None
