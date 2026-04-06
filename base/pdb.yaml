@@ -1,0 +1,17 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fibonacci-api
+  labels:
+    app: fibonacci-api
+    app.kubernetes.io/name: fibonacci-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: fibonacci
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: fibonacci-api
+
+  # Optionally specify which disruptions are allowed
+  # unhealthyPodEvictionPolicy: IfHealthyBudget

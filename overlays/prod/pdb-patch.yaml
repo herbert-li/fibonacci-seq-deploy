@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fibonacci-api
+spec:
+  minAvailable: 2  # Ensure at least 2 pods are always available in production

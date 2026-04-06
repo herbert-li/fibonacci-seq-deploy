@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fibonacci-api
+  labels:
+    app: fibonacci-api
+    app.kubernetes.io/name: fibonacci-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: fibonacci
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: fibonacci-api-tls
+spec:
+  type: ClusterIP
+  selector:
+    app: fibonacci-api
+  ports:
+  - name: http
+    port: 5000
+    targetPort: http
+    protocol: TCP
+  sessionAffinity: None

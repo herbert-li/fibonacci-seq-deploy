@@ -1,0 +1,26 @@
+# Kustomize build outputs
+kustomization-*.yaml
+.kustomize-*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+
+# Secrets (just in case)
+*secret*.yaml
+*credentials*.yaml
+kubeconfig*
+*.key
+*.pem

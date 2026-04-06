@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fibonacci-bootstrap
+  namespace: argocd
+  labels:
+    app: fibonacci-bootstrap
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/herbert-li/fibonacci-seq-deploy.git
+    targetRevision: main
+    path: argocd
+    directory:
+      recurse: true
+      include: '{projects/*.yaml,applications/*.yaml}'
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true      # Remove resources deleted from Git
+      selfHeal: true   # Auto-sync when cluster state drifts
+      allowEmpty: false
+
+    syncOptions:
+    - CreateNamespace=true
+    - ApplyOutOfSyncOnly=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

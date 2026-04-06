@@ -1,0 +1,6 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fibonacci-api
+spec:
+  host: fibonacci-dev.apps.cluster.example.com

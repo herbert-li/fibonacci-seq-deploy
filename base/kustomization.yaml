@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: fibonacci-api-base
+  annotations:
+    description: Base Kubernetes manifests for Fibonacci API
+
+# Common labels applied to all resources
+commonLabels:
+  app.kubernetes.io/managed-by: argocd
+  app.kubernetes.io/version: v1
+
+# Resources to include
+resources:
+  - deployment.yaml
+  - service.yaml
+  - route.yaml
+  - hpa.yaml
+  - pdb.yaml
+
+# Images (to be replaced by overlays)
+images:
+  - name: fibonacci-api
+    newName: docker.io/changeme/fibonacci-api
+    newTag: latest

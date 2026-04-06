@@ -1,0 +1,84 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: fibonacci
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    project: fibonacci
+spec:
+  description: Fibonacci API Project
+
+  # Source repositories
+  sourceRepos:
+  - '*'  # Allow all repositories (or specify your Git repo URL)
+
+  # Destination clusters and namespaces
+  destinations:
+  - namespace: fibonacci-dev
+    server: https://kubernetes.default.svc
+  - namespace: fibonacci-test
+    server: https://kubernetes.default.svc
+  - namespace: fibonacci-prod
+    server: https://kubernetes.default.svc
+
+  # Cluster resource whitelist
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+
+  # Namespace resource whitelist
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: Service
+  - group: ''
+    kind: ConfigMap
+  - group: ''
+    kind: Secret
+  - group: apps
+    kind: Deployment
+  - group: apps
+    kind: StatefulSet
+  - group: apps
+    kind: ReplicaSet
+  - group: autoscaling
+    kind: HorizontalPodAutoscaler
+  - group: policy
+    kind: PodDisruptionBudget
+  - group: route.openshift.io
+    kind: Route
+  - group: networking.k8s.io
+    kind: Ingress
+  - group: networking.k8s.io
+    kind: NetworkPolicy
+
+  # Roles for project members
+  roles:
+  - name: developer
+    description: Developer role with read-only access
+    policies:
+    - p, proj:fibonacci:developer, applications, get, fibonacci/*, allow
+    - p, proj:fibonacci:developer, applications, sync, fibonacci/fibonacci-dev, allow
+    groups:
+    - fibonacci-developers
+
+  - name: operator
+    description: Operator role with sync access
+    policies:
+    - p, proj:fibonacci:operator, applications, *, fibonacci/*, allow
+    groups:
+    - fibonacci-operators
+
+  # Orphaned resources monitoring
+  orphanedResources:
+    warn: true
+
+  # Sync windows (optional - restrict when syncs can happen)
+  # syncWindows:
+  # - kind: deny
+  #   schedule: '0 22 * * *'
+  #   duration: 2h
+  #   applications:
+  #   - fibonacci-prod
+  #   manualSync: true

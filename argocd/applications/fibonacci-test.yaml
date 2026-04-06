@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fibonacci-test
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    notifications.argoproj.io/subscribe.on-deployed.slack: fibonacci-deployments
+    notifications.argoproj.io/subscribe.on-health-degraded.slack: fibonacci-alerts
+  labels:
+    environment: test
+    project: fibonacci
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: fibonacci
+
+  source:
+    repoURL: https://github.com/herbert-li/fibonacci-seq-deploy.git
+    targetRevision: main
+    path: overlays/test
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fibonacci-test
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+
+    syncOptions:
+    - CreateNamespace=true
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
+    - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Ignore differences in certain fields
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas
+  - group: route.openshift.io
+    kind: Route
+    jsonPointers:
+    - /status
+
+  revisionHistoryLimit: 10

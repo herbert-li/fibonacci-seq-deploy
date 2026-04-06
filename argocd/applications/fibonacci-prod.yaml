@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fibonacci-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    notifications.argoproj.io/subscribe.on-deployed.slack: fibonacci-deployments
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: fibonacci-alerts
+    notifications.argoproj.io/subscribe.on-health-degraded.slack: fibonacci-alerts
+  labels:
+    environment: prod
+    project: fibonacci
+    criticality: high
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: fibonacci
+
+  source:
+    repoURL: https://github.com/herbert-li/fibonacci-seq-deploy.git
+    targetRevision: main
+    path: overlays/prod
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fibonacci-prod
+
+  syncPolicy:
+    # Manual sync for production (safer - requires approval)
+    # Change to automated if you want auto-deployment to prod
+    automated: null
+
+    # Uncomment for automated sync in production (after testing)
+    # automated:
+    #   prune: false     # Don't auto-prune in prod
+    #   selfHeal: true
+    #   allowEmpty: false
+
+    syncOptions:
+    - CreateNamespace=true
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
+    - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 5m
+
+  # Ignore differences in certain fields
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas  # Let HPA manage replicas
+  - group: route.openshift.io
+    kind: Route
+    jsonPointers:
+    - /status
+  - group: autoscaling
+    kind: HorizontalPodAutoscaler
+    jsonPointers:
+    - /status
+
+  revisionHistoryLimit: 20

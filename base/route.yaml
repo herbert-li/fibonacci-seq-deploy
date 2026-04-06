@@ -1,0 +1,32 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fibonacci-api
+  labels:
+    app: fibonacci-api
+    app.kubernetes.io/name: fibonacci-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: fibonacci
+  annotations:
+    haproxy.router.openshift.io/timeout: 60s
+    haproxy.router.openshift.io/rate-limit-connections: "true"
+    haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp: "100"
+    haproxy.router.openshift.io/rate-limit-connections.rate-tcp: "50"
+spec:
+  # host will be overridden by environment overlays
+  host: fibonacci-api.apps.cluster.example.com
+
+  to:
+    kind: Service
+    name: fibonacci-api
+    weight: 100
+
+  port:
+    targetPort: http
+
+  # TLS configuration - edge termination
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+  wildcardPolicy: None

@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fibonacci-dev
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    notifications.argoproj.io/subscribe.on-deployed.slack: fibonacci-deployments
+    notifications.argoproj.io/subscribe.on-health-degraded.slack: fibonacci-alerts
+  labels:
+    environment: dev
+    project: fibonacci
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: fibonacci
+
+  source:
+    repoURL: https://github.com/herbert-li/fibonacci-seq-deploy.git
+    targetRevision: main
+    path: overlays/dev
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fibonacci-dev
+
+  syncPolicy:
+    automated:
+      prune: true      # Automatically prune resources not in Git
+      selfHeal: true   # Automatically sync when cluster state diverges
+      allowEmpty: false
+
+    syncOptions:
+    - CreateNamespace=true    # Auto-create namespace if it doesn't exist
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true          # Prune resources after new resources are healthy
+    - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Ignore differences in certain fields
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas  # Ignore replicas if HPA is managing it
+  - group: route.openshift.io
+    kind: Route
+    jsonPointers:
+    - /status
+
+  # Health assessment
+  revisionHistoryLimit: 10
